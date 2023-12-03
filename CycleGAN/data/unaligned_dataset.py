@@ -64,8 +64,8 @@ class UnalignedDataset(BaseDataset):
         A_img = np.array([np.load(A_path)]).astype(np.float32)
         B_img = np.array([np.load(B_path)]).astype(np.float32)
         # apply image transformation
-        A = np.pad(A_img, [(0,0), (1,1), (1, 1)], 'constant')
-        B = np.pad(B_img, [(0,0), (1,1), (1, 1)], 'constant')
+        A = np.pad(A_img, [(0,0), (3,3), (3, 3)], 'constant')
+        B = np.pad(B_img, [(0,0), (3,3), (3, 3)], 'constant')
 
 
         return {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path}
