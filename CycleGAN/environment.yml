@@ -1,19 +1,21 @@
-name: CycleGAN
+name: CosmoML
 channels:
 - pytorch
 - defaults
 - conda-forge
+- nvidia
 dependencies:
-- python=3.8
-- pytorch=1.8.1
+- pytorch
+- torchvision
+- pytorch-cuda=12.1
 - scipy
 - visdom
+- jsonpatch
 - matplotlib
 - pip
 - pip:
-  - dominate==2.6.0
-  - torchvision==0.9.1
-  - Pillow==8.0.1
-  - numpy==1.19.2
-  - wandb==0.12.18
-
+  - dominate
+  - Pillow
+  - numpy
+  - packaging
+  - GPUtil

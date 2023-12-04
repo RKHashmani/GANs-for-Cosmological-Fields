@@ -1,3 +1,7 @@
+*.xml
+*.json
+.ipynb_checkpoints/
+node_modules/
 .DS_Store
 debug*
 datasets/
@@ -41,6 +45,3 @@ test/.coverage
 test/data/legacy_serialized.pt
 *~
 .idea
-
-#Ignore Wandb
-wandb/

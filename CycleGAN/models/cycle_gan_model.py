@@ -3,6 +3,10 @@ import itertools
 from util.image_pool import ImagePool
 from .base_model import BaseModel
 from . import networks
+try:
+    from apex import amp
+except ImportError as error:
+    print(error)
 
 
 class CycleGANModel(BaseModel):
@@ -36,7 +40,8 @@ class CycleGANModel(BaseModel):
         Identity loss (optional): lambda_identity * (||G_A(B) - B|| * lambda_B + ||G_B(A) - A|| * lambda_A) (Sec 5.2 "Photo generation from paintings" in the paper)
         Dropout is not used in the original CycleGAN paper.
         """
-        parser.set_defaults(no_dropout=True)  # default CycleGAN did not use dropout
+        # parser.set_defaults(no_dropout=True, no_antialias=True, no_antialias_up=True)  # default CycleGAN did not use dropout
+        # parser.set_defaults(no_dropout=True)
         if is_train:
             parser.add_argument('--lambda_A', type=float, default=10.0, help='weight for cycle loss (A -> B -> A)')
             parser.add_argument('--lambda_B', type=float, default=10.0, help='weight for cycle loss (B -> A -> B)')
@@ -70,16 +75,16 @@ class CycleGANModel(BaseModel):
         # define networks (both Generators and discriminators)
         # The naming is different from those used in the paper.
         # Code (vs. paper): G_A (G), G_B (F), D_A (D_Y), D_B (D_X)
-        self.netG_A = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, opt.netG, opt.norm,
-                                        not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
-        self.netG_B = networks.define_G(opt.output_nc, opt.input_nc, opt.ngf, opt.netG, opt.norm,
-                                        not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
+        self.netG_A = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, opt.netG, opt.normG,
+                                        not opt.no_dropout, opt.init_type, opt.init_gain, opt.no_antialias, opt.no_antialias_up, self.gpu_ids, opt=opt)
+        self.netG_B = networks.define_G(opt.output_nc, opt.input_nc, opt.ngf, opt.netG, opt.normG,
+                                        not opt.no_dropout, opt.init_type, opt.init_gain, opt.no_antialias, opt.no_antialias_up, self.gpu_ids, opt=opt)
 
         if self.isTrain:  # define discriminators
             self.netD_A = networks.define_D(opt.output_nc, opt.ndf, opt.netD,
-                                            opt.n_layers_D, opt.norm, opt.init_type, opt.init_gain, self.gpu_ids)
+                                            opt.n_layers_D, opt.normD, opt.init_type, opt.init_gain, opt.no_antialias, self.gpu_ids, opt=opt)
             self.netD_B = networks.define_D(opt.input_nc, opt.ndf, opt.netD,
-                                            opt.n_layers_D, opt.norm, opt.init_type, opt.init_gain, self.gpu_ids)
+                                            opt.n_layers_D, opt.normD, opt.init_type, opt.init_gain, opt.no_antialias, self.gpu_ids, opt=opt)
 
         if self.isTrain:
             if opt.lambda_identity > 0.0:  # only works when input and output images have the same number of channels
@@ -135,7 +140,11 @@ class CycleGANModel(BaseModel):
         loss_D_fake = self.criterionGAN(pred_fake, False)
         # Combined loss and calculate gradients
         loss_D = (loss_D_real + loss_D_fake) * 0.5
-        loss_D.backward()
+        if self.opt.amp:
+            with amp.scale_loss(loss_D, self.optimizer_D) as scaled_loss:
+                scaled_loss.backward()
+        else:
+            loss_D.backward()
         return loss_D
 
     def backward_D_A(self):
@@ -157,8 +166,6 @@ class CycleGANModel(BaseModel):
         if lambda_idt > 0:
             # G_A should be identity if real_B is fed: ||G_A(B) - B||
             self.idt_A = self.netG_A(self.real_B)
-            # print(f"idt_A: {self.idt_A.shape}")
-            # print(f"real_B: {self.real_B.shape}")
             self.loss_idt_A = self.criterionIdt(self.idt_A, self.real_B) * lambda_B * lambda_idt
             # G_B should be identity if real_A is fed: ||G_B(A) - A||
             self.idt_B = self.netG_B(self.real_A)
@@ -177,7 +184,26 @@ class CycleGANModel(BaseModel):
         self.loss_cycle_B = self.criterionCycle(self.rec_B, self.real_B) * lambda_B
         # combined loss and calculate gradients
         self.loss_G = self.loss_G_A + self.loss_G_B + self.loss_cycle_A + self.loss_cycle_B + self.loss_idt_A + self.loss_idt_B
-        self.loss_G.backward()
+        if self.opt.amp:
+            with amp.scale_loss(self.loss_G, self.optimizer_G) as scaled_loss:
+                scaled_loss.backward()
+        else:
+            self.loss_G.backward()
+
+    def data_dependent_initialize(self):
+        return
+
+    def generate_visuals_for_evaluation(self, data, mode):
+        with torch.no_grad():
+            visuals = {}
+            AtoB = self.opt.direction == "AtoB"
+            G = self.netG_A
+            source = data["A" if AtoB else "B"].to(self.device)
+            if mode == "forward":
+                visuals["fake_B"] = G(source)
+            else:
+                raise ValueError("mode %s is not recognized" % mode)
+            return visuals
 
     def optimize_parameters(self):
         """Calculate losses, gradients, and update network weights; called in every training iteration"""
