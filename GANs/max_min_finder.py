@@ -1,18 +1,19 @@
 import numpy as np
 import glob
 
+
 def get_max_min(dataset="Mcdm-HI", phase="trainA", filename="dm"):
     max_value = float('-inf')
     min_value = float('inf')
 
     npfiles = glob.glob(f'./datasets/IllustrisTNG/{dataset}/{phase}/{filename}_*.npy')
     npfiles.sort()
+    all_arrays = []
     for npfile in npfiles:
-        data = np.load(npfile)
-        max_value = max(max_value, data.max())
-        min_value = min(min_value, data.min())
-
-    return max_value, min_value
+        all_arrays.append(np.load(npfile))
+    all_arrays = np.array(all_arrays)
+    print(all_arrays.shape)
+    return all_arrays.max(), all_arrays.min()
 
 Mcdm_max, Mcdm_min = get_max_min(dataset="Mcdm-HI", phase="trainA", filename="dm")
 print(f"Mcdm max value is {Mcdm_max}")
