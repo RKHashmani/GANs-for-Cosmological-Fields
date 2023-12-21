@@ -5,6 +5,7 @@ from PIL import Image
 import random
 import util.util as util
 import numpy as np
+import torch
 
 
 class UnalignedDataset(BaseDataset):
@@ -72,8 +73,20 @@ class UnalignedDataset(BaseDataset):
         A_img = np.array([np.load(A_path)]).astype(np.float32)
         B_img = np.array([np.load(B_path)]).astype(np.float32)
         # apply image transformation
-        A = np.pad(A_img, [(0, 0), (1, 1), (1, 1)], 'constant')
-        B = np.pad(B_img, [(0, 0), (1, 1), (1, 1)], 'constant')
+        # A = np.pad(A_img, [(0, 0), (1, 1), (1, 1)], 'constant') # No need for this anymore.
+        # B = np.pad(B_img, [(0, 0), (1, 1), (1, 1)], 'constant')
+
+        A_img = torch.from_numpy(A_img)
+        B_img = torch.from_numpy(B_img)
+
+        # Apply image transformation
+        # For CUT/FastCUT mode, if in finetuning phase (learning rate is decaying),
+        # do not perform resize-crop data augmentation of CycleGAN.
+        is_finetuning = self.opt.isTrain and self.current_epoch > self.opt.n_epochs
+        modified_opt = util.copyconf(self.opt, load_size=self.opt.crop_size if is_finetuning else self.opt.load_size)
+        transform = get_transform(modified_opt, convert=False)
+        A = transform(A_img)
+        B = transform(B_img)
 
         return {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path}
 
