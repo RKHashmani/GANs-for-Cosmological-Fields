@@ -79,6 +79,7 @@ class BaseOptions():
         parser.add_argument('--B_scaled_std', type=float, default=0.0017408773268459896, help='Dataset B Standard Deviation')
         parser.add_argument('--min_max_scale', action='store_true', help='if specified, do min max scaling')
         parser.add_argument('--standardize', action='store_true', help='if specified, do standardization with scaled mean/std.')
+        parser.add_argument('--save_figs', action='store_true', help='if specified, save figures as png. Note: Takes long time.')
 
         self.initialized = True
         return parser
