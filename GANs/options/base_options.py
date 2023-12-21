@@ -69,6 +69,17 @@ class BaseOptions():
                             default=1, type=int,
                             help='Number of downsampling layers used by StyleGAN2Generator')
 
+        parser.add_argument('--Amax', type=float, default=457721779490672.1, help='Dataset A Maximum')
+        parser.add_argument('--Amin', type=float, default=60970772574.29126, help='Dataset A Minimum')
+        parser.add_argument('--A_scaled_mean', type=float, default=0.0006551713931004052, help='Dataset A Mean')
+        parser.add_argument('--A_scaled_std', type=float, default=0.0005647735866979585, help='Dataset A Standard Deviation')
+        parser.add_argument('--Bmax', type=float, default=534029910702.803, help='Dataset B Maximum')
+        parser.add_argument('--Bmin', type=float, default=616794.4824397375, help='Dataset B Minimum')
+        parser.add_argument('--B_scaled_mean', type=float, default=0.00021139645091832043, help='Dataset B Mean')
+        parser.add_argument('--B_scaled_std', type=float, default=0.0017408773268459896, help='Dataset B Standard Deviation')
+        parser.add_argument('--min_max_scale', action='store_true', help='if specified, do min max scaling')
+        parser.add_argument('--standardize', action='store_true', help='if specified, do standardization with scaled mean/std.')
+
         self.initialized = True
         return parser
 
