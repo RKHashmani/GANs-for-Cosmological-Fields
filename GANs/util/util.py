@@ -8,6 +8,8 @@ import importlib
 import argparse
 from argparse import Namespace
 import torchvision
+import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
 
 
 def str2bool(v):
@@ -87,7 +89,7 @@ def tensor2npy(input_image, label, opt):
                 image_numpy = (image_numpy * (opt.Bmax - opt.Bmin)) + opt.Bmin
     else:  # if it is a numpy array, do nothing
         image_numpy = input_image
-    return image_numpy
+    return image_numpy.squeeze()
 
 
 def diagnose_network(net, name='network'):
@@ -127,6 +129,16 @@ def save_image(image_numpy, image_path, aspect_ratio=1.0):
     elif aspect_ratio < 1.0:
         image_pil = image_pil.resize((int(h / aspect_ratio), w), Image.BICUBIC)
     image_pil.save(image_path)
+
+
+def save_plot(image_numpy, image_path, label, name):
+
+    plt.imshow(image_numpy, origin='lower', interpolation='bicubic', norm=LogNorm())
+    plt.title('%s/%s' % (label, name))
+    plt.colorbar()
+    plt.tight_layout()
+    plt.savefig(image_path, dpi=600, facecolor="white", edgecolor='none', bbox_inches="tight")
+    plt.clf()
 
 
 def print_numpy(x, val=True, shp=False):
