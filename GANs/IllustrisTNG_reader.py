@@ -7,17 +7,17 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 
 file_name1 = "dm_9000.npy"
-file_name2 = "B_9000.npy"
+file_name2 = "nh_9000.npy"
 
 # Load the data
-Mcdm = np.load(f'./datasets/IllustrisTNG/Mcdm-B/testA/{file_name1}')
-HI = np.load(f'./datasets/IllustrisTNG/Mcdm-B/testB/{file_name2}')
+Mcdm = np.load(f'./datasets/IllustrisTNG/Mcdm-HI/testA/{file_name1}')
+HI = np.load(f'./datasets/IllustrisTNG/Mcdm-HI/testB/{file_name2}')
 
-real_A = np.load(f'./results/Mcdm-B_CUT/test_latest/images/real_A/{file_name1}')
-real_B = np.load(f'./results/Mcdm-B_CUT/test_latest/images/real_B/{file_name1}')
-fake_B = np.load(f'./results/Mcdm-B_CUT/test_latest/images/fake_B/{file_name1}')
+real_A = np.load(f'./results/Mcdm-HI_CUT/test_latest/images/real_A/{file_name1}')
+real_B = np.load(f'./results/Mcdm-HI_CUT/test_latest/images/real_B/{file_name1}')
+fake_B = np.load(f'./results/Mcdm-HI_CUT/test_latest/images/fake_B/{file_name1}')
 
-fake_B = (fake_B - fake_B.min()) / (fake_B.max() - fake_B.min()) * 22.321495099260055
+fake_B = (fake_B - fake_B.min()) / (fake_B.max() - fake_B.min())
 
 # Mcdm = np.pad(Mcdm, [(1, 1), (1, 1)], 'constant')
 
