@@ -133,7 +133,7 @@ def get_transform(opt, params=None, grayscale=False, method=Image.BICUBIC, conve
 
 
 def __make_power_2(img, base, method=Image.BICUBIC):
-    _, ow, oh = img.size()
+    _, ow, oh = img.size()  # Getting Tensor Size.
     h = int(round(oh / base) * base)
     w = int(round(ow / base) * base)
     if h == oh and w == ow:
