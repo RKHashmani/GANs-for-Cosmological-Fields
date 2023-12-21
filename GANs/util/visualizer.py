@@ -6,15 +6,13 @@ import time
 from . import util, html
 from subprocess import Popen, PIPE
 
-import numpy as np
-
 if sys.version_info[0] == 2:
     VisdomExceptionBase = Exception
 else:
     VisdomExceptionBase = ConnectionError
 
 
-def save_images(webpage, visuals, image_path, aspect_ratio=1.0, width=256):
+def save_images(webpage, visuals, image_path, opt, aspect_ratio=1.0, width=256):
     """Save images to the disk.
 
     Parameters:
@@ -23,6 +21,7 @@ def save_images(webpage, visuals, image_path, aspect_ratio=1.0, width=256):
         image_path (str)         -- the string is used to create image paths
         aspect_ratio (float)     -- the aspect ratio of saved images
         width (int)              -- the images will be resized to width x width
+        opt (Option class)       -- stores all the experiment flags. Added by Raheem.
 
     This function will save images stored in 'visuals' to the HTML file specified by 'webpage'.
     """
@@ -34,19 +33,18 @@ def save_images(webpage, visuals, image_path, aspect_ratio=1.0, width=256):
     ims, txts, links = [], [], []
 
     for label, im_data in visuals.items():
-        im = im_data.cpu().detach().numpy() # convert tensor to numpy array instead of image
-        im = im.squeeze() # remove the channel dimension
-        # im = im[1:-1, 1:-1] # remove the padding
-        # im = (im - im.min()) / (im.max() - im.min())
+        # im = util.tensor2im(im_data)
+        im = util.tensor2npy(im_data, label, opt)  # Returns Npy File that matches the input
+        npy_name = '%s/%s' % (label, name)
+        os.makedirs(os.path.join(image_dir, label), exist_ok=True)
+        save_path = os.path.join(image_dir, npy_name)
+        np.save(save_path, im)  # Saving the generated npy Files.
 
 
-
-        image_name = '%s/%s' % (label, name)
+        image_name = '%s/%s.png' % (label, name)
         os.makedirs(os.path.join(image_dir, label), exist_ok=True)
         save_path = os.path.join(image_dir, image_name)
-        np.save(save_path, im)
-
-        # util.save_image(im, save_path, aspect_ratio=aspect_ratio)
+        util.save_image(im, save_path, aspect_ratio=aspect_ratio)
         ims.append(image_name)
         txts.append(label)
         links.append(image_name)
