@@ -40,11 +40,14 @@ def save_images(webpage, visuals, image_path, opt, aspect_ratio=1.0, width=256):
         save_path = os.path.join(image_dir, npy_name)
         np.save(save_path, im)  # Saving the generated npy Files.
 
-
         image_name = '%s/%s.png' % (label, name)
-        os.makedirs(os.path.join(image_dir, label), exist_ok=True)
-        save_path = os.path.join(image_dir, image_name)
-        util.save_image(im, save_path, aspect_ratio=aspect_ratio)
+        if opt.save_figs:
+            os.makedirs(os.path.join(image_dir, label), exist_ok=True)
+            save_path = os.path.join(image_dir, image_name)
+            # util.save_image(im, save_path, aspect_ratio=aspect_ratio)
+            util.save_plot(im, save_path, label, name)
+
+        # This stores the location of the images to create the HTML file.
         ims.append(image_name)
         txts.append(label)
         links.append(image_name)
