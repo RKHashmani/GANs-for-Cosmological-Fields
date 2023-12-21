@@ -63,9 +63,6 @@ class UnalignedDataset(BaseDataset):
 
         A_img = np.array([np.load(A_path)]).astype(np.float32)
         B_img = np.array([np.load(B_path)]).astype(np.float32)
-        # Apply Padding. Not needed anymore.
-        # A = np.pad(A_img, [(0, 0), (1, 1), (1, 1)], 'constant')
-        # B = np.pad(B_img, [(0, 0), (1, 1), (1, 1)], 'constant')
 
         A_img = torch.from_numpy(A_img)
         B_img = torch.from_numpy(B_img)
