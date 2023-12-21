@@ -4,6 +4,7 @@ from data.image_folder import make_dataset
 from PIL import Image
 import random
 import util.util as util
+
 import numpy as np
 import torch
 
@@ -57,23 +58,13 @@ class UnalignedDataset(BaseDataset):
         else:   # randomize the index for domain B to avoid fixed pairs.
             index_B = random.randint(0, self.B_size - 1)
         B_path = self.B_paths[index_B]
-
         # A_img = Image.open(A_path).convert('RGB')
         # B_img = Image.open(B_path).convert('RGB')
 
-        # # Apply image transformation
-        # # For CUT/FastCUT mode, if in finetuning phase (learning rate is decaying),
-        # # do not perform resize-crop data augmentation of CycleGAN.
-        # is_finetuning = self.opt.isTrain and self.current_epoch > self.opt.n_epochs
-        # modified_opt = util.copyconf(self.opt, load_size=self.opt.crop_size if is_finetuning else self.opt.load_size)
-        # transform = get_transform(modified_opt)
-        # A = transform(A_img)
-        # B = transform(B_img)
-
         A_img = np.array([np.load(A_path)]).astype(np.float32)
         B_img = np.array([np.load(B_path)]).astype(np.float32)
-        # apply image transformation
-        # A = np.pad(A_img, [(0, 0), (1, 1), (1, 1)], 'constant') # No need for this anymore.
+        # Apply Padding. Not needed anymore.
+        # A = np.pad(A_img, [(0, 0), (1, 1), (1, 1)], 'constant')
         # B = np.pad(B_img, [(0, 0), (1, 1), (1, 1)], 'constant')
 
         A_img = torch.from_numpy(A_img)
@@ -87,6 +78,13 @@ class UnalignedDataset(BaseDataset):
         transform = get_transform(modified_opt, convert=False)
         A = transform(A_img)
         B = transform(B_img)
+
+        if modified_opt.min_max_scale:  # Scale between 0 and 1
+            A = (A - modified_opt.Amin) / (modified_opt.Amax - modified_opt.Amin)
+            B = (B - modified_opt.Bmin) / (modified_opt.Bmax - modified_opt.Bmin)
+        if modified_opt.standardize:  # Normalize
+            A = (A - modified_opt.A_scaled_mean) / modified_opt.A_scaled_std
+            B = (B - modified_opt.B_scaled_mean) / modified_opt.B_scaled_std
 
         return {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path}
 
