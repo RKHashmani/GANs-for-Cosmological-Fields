@@ -1,0 +1,42 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  Generative Mapping Between Fields in the IllustrisTNG
+  Dataset
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Raheem
+    family-names: Hashmani
+    email: hashmani@wisc.edu
+    affiliation: University of Wisconsin–Madison
+  - given-names: Joyce
+    family-names: Lin
+    email: jlin475@wisc.edu
+    affiliation: University of Wisconsin–Madison
+repository-code: 'https://github.com/RKHashmani/GANs-for-Cosmological-Fields'
+abstract: >-
+  For our Computational Cosmology course project, we build a
+  bijective mapping between physical fields from the CAMELS
+  simulation using a state-of-the-art GAN specializing in
+  unpaired image-to-image translation.
+
+
+  We train a Contrastive Unpaired Translation (CUT) model to
+  create these mappings between dark matter and neutral
+  hydrogen (Mcdm-HI), dark matter and magnetic fields
+  magnitude (Mcdm-B), and neutral hydrogen and magnetic
+  fields magnitude (HI-B). We then evaluate the performance
+  of our models using 3 summary statistics: the power
+  spectrum, cross correlation coefficient, and the
+  probability distribution function.
+keywords:
+  - GANs
+  - IllustrisTNG
+  - Deep Learning
+  - Cosmology
+license: MIT
