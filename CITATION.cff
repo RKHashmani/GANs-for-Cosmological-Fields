@@ -10,7 +10,7 @@ message: >-
   metadata from this file.
 type: software
 authors:
-  - given-names: Raheem
+  - given-names: Raheem Karim
     family-names: Hashmani
     email: hashmani@wisc.edu
     affiliation: University of Wisconsin–Madison
